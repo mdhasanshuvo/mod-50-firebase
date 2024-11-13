@@ -4,23 +4,38 @@ import auth from '../../firebase.init';
 
 const Register = () => {
 
+    const [success, setSuccess] = useState(false);
 
-    const [errorm,setErrorm] = useState('')
+    const [errorMessage,setErrorMessage] = useState('')
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const email = e.target.email.value;
         const pass = e.target.password.value;
 
-        setErrorm('');
+        setErrorMessage('');
+        setSuccess(false)
+
+        if(pass.length < 6){
+            setErrorMessage('Password should be at least 6 characters');
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+        if(!passwordRegex.test(pass)){
+            setErrorMessage('Password should have atleast one uppercase, one lower case, one digit and one special character')
+            return;
+        }
 
         createUserWithEmailAndPassword(auth, email, pass)
         .then(result => {
-            console.log(result.user)
+            console.log(result.user);
+            setSuccess(true);
         })
         .catch(error =>{
             console.log('ERROR', error);
-            setErrorm(error.message);
+            setErrorMessage(error.message);
+            setSuccess(false);
         })
     }
     return (
@@ -43,7 +58,10 @@ const Register = () => {
                 </form>
             </div>
             {
-                errorm && <h4>{errorm}</h4>
+                errorMessage && <h4 className='text-red-400'>{errorMessage}</h4>
+            }
+            {
+                success && <h4 className='text-green-400'>Successfully submitted</h4>
             }
         </div>
     );
